@@ -28,7 +28,9 @@ function initMap() {
 
     // create infowindow object for a marker to display information, pics etc.
     var largeInfowindow = new google.maps.InfoWindow();
-
+    // for the listings which are outside of initial zoom area, adjust the
+    // boundaries of the map
+    var bounds = new google.maps.LatLngBounds();
     // create an array of markers for the locations
     for (var i = 0; i < locations.length; i++) {
         // get the position from the location array
@@ -44,10 +46,31 @@ function initMap() {
         });
         // push the marker to our array of markers
         markers.push(marker);
+        // extend the boundaries of the map for each marker
+        bounds.extend(marker.position);
         // create and onclick event to open an infowindow at each marker
         marker.addListener('click', function() {
             populateInfoWindow(this, largeInfowindow);
         });
     }
-  
+    // tell the map to fit the bounds
+    map.fitBounds(bounds);
+
+    // this function populates the infowindow when the marker is clicked. We'll
+    // only allow one infowindow which will open at the marker that is clicked,
+    // and populate based on that marker's position
+    function populateInfoWindow(marker, infowindow) {
+      // check to make sure the infowindow is not akready opened on this marker
+      if (infowindow.marker != marker) {
+        infowindow.marker = marker;
+        infowindow.setContent('<div>' + marker.title + '</div>');
+        infowindow.open(map, marker);
+        // make sure the marker property is cleared if the infowindow is closed
+        infowindow.addListener('closeclick', function() {
+          infowindow.setMarker(null);
+        });
+      }
+    }
+
+
 }
