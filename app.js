@@ -28,9 +28,7 @@ function initMap() {
 
     // create infowindow object for a marker to display information, pics etc.
     var largeInfowindow = new google.maps.InfoWindow();
-    // for the listings which are outside of initial zoom area, adjust the
-    // boundaries of the map
-    var bounds = new google.maps.LatLngBounds();
+
     // create an array of markers for the locations
     for (var i = 0; i < locations.length; i++) {
         // get the position from the location array
@@ -38,23 +36,25 @@ function initMap() {
         var title = locations[i].title;
         // create a marker per location and put into markers array
         var marker = new google.maps.Marker({
-            map: map,
+            //map: map,
             position: position,
             title: title,
             animation: google.maps.Animation.DROP,
-            id: 1
+            id: i
         });
         // push the marker to our array of markers
         markers.push(marker);
-        // extend the boundaries of the map for each marker
-        bounds.extend(marker.position);
-        // create and onclick event to open an infowindow at each marker
+
+        // create an onclick event to open an infowindow at each marker
         marker.addListener('click', function() {
-            populateInfoWindow(this, largeInfowindow);
+          populateInfoWindow(this, largeInfowindow);
         });
     }
-    // tell the map to fit the bounds
-    map.fitBounds(bounds);
+    // create the event listeners to show and hide the listings when the button
+    // is clicked
+    document.getElementById('show-listings').addEventListener('click', showListings);
+    document.getElementById('hide-listings').addEventListener('click', hideListings);
+  }
 
     // this function populates the infowindow when the marker is clicked. We'll
     // only allow one infowindow which will open at the marker that is clicked,
@@ -72,5 +72,22 @@ function initMap() {
       }
     }
 
+    // this function will loop through the markers array and display them allow
+    function showListings() {
+      // for the listings which are outside of initial zoom area, adjust // the boundaries of the map
+      var bounds = new google.maps.LatLngBounds();
+      // extend the boundaries of the map for each marker
+      for (var i = 0; i < markers.length; i++) {
+          markers[i].setMap(map);
+          bounds.extend(markers[i].position);
+      }
+      // tell the map to fit the bounds
+      map.fitBounds(bounds);
+    }
 
-}
+    // this function will loop through the markers array and hide them allow
+    function hideListings() {
+      for (var i = 0; i < markers.length; i++) {
+        markers[i].setMap(null);
+      }
+    }
